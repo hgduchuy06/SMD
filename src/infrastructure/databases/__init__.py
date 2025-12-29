@@ -1,7 +1,6 @@
-from infrastructure.databases.mssql import init_mssql
-from infrastructure.models import course_register_model, todo_model, user_model, course_model, consultant_model, appointment_model, program_model, feedback_model,survey_model
+from infrastructure.databases.mysql import init_mysql, create_tables
+from infrastructure.models import role,user,CloPloMapping,clo,plo,program,feeback,mouldeRelationship,notification,reviewWorkflow,subject,subscription,syllabus,syllabusversion,AIprocesslog,deparment
 
-def init_db(app):
-    init_mssql(app)
-    
-from infrastructure.databases.mssql import Base
+def init_db():
+    init_mysql()
+    create_tables()
