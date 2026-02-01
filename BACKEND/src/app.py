@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from api.swagger import spec
 from api.controllers.user_controller import bp as todo_bp
+from api.controllers.ai_controller import ai_bp
 from api.middleware import middleware
 from api.responses import success_response
 from infrastructure.databases import init_db
@@ -15,6 +16,7 @@ def create_app():
     Swagger(app)
     # Đăng ký blueprint trước
     app.register_blueprint(todo_bp)
+    app.register_blueprint(ai_bp)
 
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
@@ -27,7 +29,7 @@ def create_app():
     app.register_blueprint(swaggerui_blueprint, url_prefix=SWAGGER_URL)
 
     try:
-        init_db()
+        init_db(app)
     except Exception as e:
         print(f"Error initializing database: {e}")
 
@@ -38,7 +40,7 @@ def create_app():
     with app.test_request_context():
         for rule in app.url_map.iter_rules():
             # Thêm các endpoint khác nếu cần
-            if rule.endpoint.startswith(('todo.', 'course.', 'user.')):
+            if rule.endpoint.startswith(('todo.', 'course.', 'user.', 'ai.')):
                 view_func = app.view_functions[rule.endpoint]
                 print(f"Adding path: {rule.rule} -> {view_func}")
                 spec.path(view=view_func)
