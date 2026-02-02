@@ -10,6 +10,32 @@ bp = Blueprint('assessment', __name__, url_prefix='/assessments')
 
 @bp.route('/', methods=['POST'])
 def create_assessment():
+    """
+        Create an assessment item for a syllabus version
+        ---
+        tags:
+            - Assessment
+        parameters:
+            - name: body
+                in: body
+                required: true
+                schema:
+                    type: object
+                    properties:
+                        versionID:
+                            type: integer
+                        assessmentType:
+                            type: string
+                        title:
+                            type: string
+                        weightPercent:
+                            type: number
+                        createdBy:
+                            type: integer
+        responses:
+            201:
+                description: Created
+        """
     data = request.get_json(silent=True) or {}
     versionID = data.get('versionID')
     assessmentType = data.get('assessmentType')
@@ -39,6 +65,31 @@ def create_assessment():
 
 @bp.route('/<int:assessment_id>', methods=['PUT'])
 def edit_assessment(assessment_id: int):
+    """
+        Edit an assessment
+        ---
+        tags:
+            - Assessment
+        parameters:
+            - name: assessment_id
+                in: path
+                type: integer
+                required: true
+            - name: body
+                in: body
+                schema:
+                    type: object
+                    properties:
+                        title:
+                            type: string
+                        weightPercent:
+                            type: number
+                        notes:
+                            type: string
+        responses:
+            200:
+                description: Updated
+        """
     data = request.get_json(silent=True) or {}
     db = SessionLocal()
     try:
@@ -56,6 +107,20 @@ def edit_assessment(assessment_id: int):
 
 @bp.route('/<int:assessment_id>', methods=['DELETE'])
 def delete_assessment(assessment_id: int):
+    """
+        Delete an assessment
+        ---
+        tags:
+            - Assessment
+        parameters:
+            - name: assessment_id
+                in: path
+                type: integer
+                required: true
+        responses:
+            200:
+                description: Deleted
+        """
     db = SessionLocal()
     try:
         a = db.get(AssessmentModel, assessment_id)
@@ -70,6 +135,30 @@ def delete_assessment(assessment_id: int):
 
 @bp.route('/<int:assessment_id>/attach_clo', methods=['POST'])
 def attach_clo(assessment_id: int):
+    """
+        Attach a CLO to an assessment
+        ---
+        tags:
+            - Assessment
+        parameters:
+            - name: assessment_id
+                in: path
+                type: integer
+                required: true
+            - name: body
+                in: body
+                required: true
+                schema:
+                    type: object
+                    properties:
+                        cloID:
+                            type: integer
+                        weightPercent:
+                            type: integer
+        responses:
+            201:
+                description: Mapping created
+        """
     data = request.get_json(silent=True) or {}
     cloID = data.get('cloID')
     weight = int(data.get('weightPercent', 0))
@@ -92,6 +181,20 @@ def attach_clo(assessment_id: int):
 
 @bp.route('/version/<int:version_id>/check_weights', methods=['GET'])
 def check_weights(version_id: int):
+    """
+        Check total assessment weights for a syllabus version (must equal 100)
+        ---
+        tags:
+            - Assessment
+        parameters:
+            - name: version_id
+                in: path
+                type: integer
+                required: true
+        responses:
+            200:
+                description: Returns total percent and whether it's valid
+        """
     db = SessionLocal()
     try:
         rows = db.query(AssessmentModel).filter(AssessmentModel.versionID == version_id).all()

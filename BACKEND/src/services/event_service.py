@@ -59,3 +59,9 @@ def emit_syllabus_action(action: str, syllabus_id: int = None, version_id: int =
         payload.update(extras)
 
     emit_event(f"syllabus.{action}", payload)
+    # Try to create user-targeted notifications for this event
+    try:
+        from services.notification_service import notify_syllabus_event
+        notify_syllabus_event(action, version_id=version_id, actor_id=actor_id, include_students=(action in ('version_updated','published','approved','rejected')))
+    except Exception:
+        pass

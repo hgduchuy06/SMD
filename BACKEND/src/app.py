@@ -9,6 +9,7 @@ from api.controllers.workitem_controller import bp as workitem_bp
 from api.controllers.syllabus_controller import bp as syllabus_bp
 from api.controllers.clo_controller import bp as clo_bp
 from api.controllers.assessment_controller import bp as assessment_bp
+from api.controllers.module_relationship_controller import bp as module_relationship_bp
 from api.middleware import middleware
 from infrastructure.databases import init_db
 from api.responses import success_response
@@ -34,6 +35,11 @@ def create_app():
     app.register_blueprint(syllabus_bp)
     app.register_blueprint(clo_bp)
     app.register_blueprint(assessment_bp)
+    app.register_blueprint(module_relationship_bp)
+    from api.controllers.subscription_controller import bp as subscription_bp
+    from api.controllers.feedback_controller import bp as feedback_bp
+    app.register_blueprint(subscription_bp)
+    app.register_blueprint(feedback_bp)
     app.register_blueprint(workflow_bp)
     app.register_blueprint(workitem_bp)
 

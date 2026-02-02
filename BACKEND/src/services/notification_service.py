@@ -8,6 +8,7 @@ from infrastructure.models.syllabusversion import SyllabusVersionModel
 from infrastructure.models.syllabus import SyllabusModel
 from infrastructure.models.user import UserModel
 from infrastructure.models.role import RoleModel
+from infrastructure.models.subscription import SubscriptionModel
 
 
 def _recent_similar_exists(db, version_id: int, event_name: str, window_seconds: int) -> bool:
@@ -90,6 +91,74 @@ def notify_ai_completion(task_id: int, window_seconds: int = 900):
                 db.add(n)
             except Exception:
                 logging.exception("Failed to queue notification for user %s", getattr(u, 'userID', None))
+        db.commit()
+    finally:
+        db.close()
+
+
+def notify_syllabus_event(event_name: str, version_id: int = None, actor_id: int = None, include_students: bool = False, window_seconds: int = 300):
+    """Notify relevant parties when a syllabus lifecycle event occurs.
+
+    event_name: 'submitted'|'approved'|'rejected'|'version_updated' etc.
+    include_students: if True, notify students who follow the syllabus (not implemented fully).
+    """
+    db = SessionLocal()
+    try:
+        if not version_id:
+            return
+
+        # dedupe by recent similar events
+        if _recent_similar_exists(db, version_id, f'syllabus.{event_name}', window_seconds):
+            return
+
+        sv = db.get(SyllabusVersionModel, version_id)
+        if not sv:
+            return
+        s = db.get(SyllabusModel, sv.syllabusID) if sv.syllabusID else None
+
+        # map roles to notify
+        role_names = ['Lecturer', 'HoD', 'AA']
+        roles = db.query(RoleModel).filter(RoleModel.roleName.in_(role_names)).all()
+        role_ids = [r.roleID for r in roles]
+
+        q = db.query(UserModel)
+        # narrow by department if possible
+        if s and getattr(s, 'subjectID', None):
+            try:
+                from infrastructure.models.subject import SubjectModel
+                subj = db.get(SubjectModel, s.subjectID)
+                if getattr(subj, 'departmentID', None):
+                    q = q.filter(UserModel.departmentID == subj.departmentID)
+            except Exception:
+                pass
+        if role_ids:
+            q = q.filter(UserModel.roleID.in_(role_ids))
+
+        recipients = q.all()
+
+        # create notifications
+        for u in recipients:
+            try:
+                message = json.dumps({"event": f"syllabus.{event_name}", "versionID": version_id, "actorID": actor_id}, ensure_ascii=False)
+                n = NotificationModel(userID=u.userID, syllabusID=sv.syllabusID if sv else None, message=message, isRead=0, createdAt=datetime.utcnow())
+                db.add(n)
+            except Exception:
+                pass
+
+        # notify subscribers/followers
+        if include_students:
+            try:
+                subs = db.query(SubscriptionModel).filter(SubscriptionModel.syllabusID == sv.syllabusID).all()
+                for sub in subs:
+                    try:
+                        message = json.dumps({"event": f"syllabus.{event_name}", "versionID": version_id, "actorID": actor_id}, ensure_ascii=False)
+                        n = NotificationModel(userID=sub.userID, syllabusID=sv.syllabusID if sv else None, message=message, isRead=0, createdAt=datetime.utcnow())
+                        db.add(n)
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
         db.commit()
     finally:
         db.close()

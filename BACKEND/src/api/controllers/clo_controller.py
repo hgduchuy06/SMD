@@ -3,6 +3,9 @@ from datetime import datetime
 from infrastructure.databases.mysql import SessionLocal
 from infrastructure.models.clo import CLOModel
 from infrastructure.models.CloPloMapping import CloPloMappingModel
+from infrastructure.models.syllabusversion import SyllabusVersionModel
+from infrastructure.models.plo import PLOModel
+from services.event_service import emit_syllabus_action
 
 bp = Blueprint('clo', __name__, url_prefix='/clos')
 
@@ -79,5 +82,78 @@ def map_clo_plo(clo_id: int):
         db.commit()
         db.refresh(m)
         return jsonify({'mappingID': m.mappingID}), 201
+    finally:
+        db.close()
+
+
+@bp.route('/version/<int:version_id>/mappings', methods=['GET'])
+def version_mappings(version_id: int):
+    """Get CLO->PLO mappings for a syllabus version
+
+    ---
+    tags:
+      - CLO
+    parameters:
+      - name: version_id
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: Mapping table
+    """
+    db = SessionLocal()
+    try:
+        clos = db.query(CLOModel).filter(CLOModel.versionID == version_id).all()
+        mappings = db.query(CloPloMappingModel).all()
+        plos = {p.ploID: p for p in db.query(PLOModel).all()}
+        out = []
+        for c in clos:
+            related = [m for m in mappings if m.cloID == c.cloID]
+            out.append({
+                'cloID': c.cloID,
+                'cloCode': c.cloCode,
+                'cloDescription': c.cloDescription,
+                'plos': [{'ploID': m.ploID, 'ploCode': plos.get(m.ploID).ploCode if plos.get(m.ploID) else None, 'mappingLevel': m.mappingLevel} for m in related]
+            })
+        return jsonify(out), 200
+    finally:
+        db.close()
+
+
+@bp.route('/syllabus/<int:syllabus_id>/mappings', methods=['GET'])
+def syllabus_mappings(syllabus_id: int):
+    """Get CLO->PLO mappings across all versions for a syllabus
+
+    ---
+    tags:
+      - CLO
+    parameters:
+      - name: syllabus_id
+        in: path
+        type: integer
+        required: true
+    responses:
+      200:
+        description: Mapping table
+    """
+    db = SessionLocal()
+    try:
+        sv_rows = db.query(SyllabusVersionModel).filter(SyllabusVersionModel.syllabusID == syllabus_id).all()
+        version_ids = [v.versionID for v in sv_rows]
+        clos = db.query(CLOModel).filter(CLOModel.versionID.in_(version_ids)).all() if version_ids else []
+        mappings = db.query(CloPloMappingModel).all()
+        plos = {p.ploID: p for p in db.query(PLOModel).all()}
+        out = []
+        for c in clos:
+            related = [m for m in mappings if m.cloID == c.cloID]
+            out.append({
+                'cloID': c.cloID,
+                'versionID': c.versionID,
+                'cloCode': c.cloCode,
+                'cloDescription': c.cloDescription,
+                'plos': [{'ploID': m.ploID, 'ploCode': plos.get(m.ploID).ploCode if plos.get(m.ploID) else None, 'mappingLevel': m.mappingLevel} for m in related]
+            })
+        return jsonify(out), 200
     finally:
         db.close()

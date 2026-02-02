@@ -10,6 +10,12 @@ class SyllabusVersionModel(Base):
     versionNumber = Column(Integer)
     content = Column(LONGTEXT)
     changeSummary = Column(Text)
+    # Detailed syllabus fields for AI and display
+    courseDescription = Column(LONGTEXT)
+    courseObjectives = Column(LONGTEXT)
+    teachingMethods = Column(LONGTEXT)
+    learningMaterials = Column(LONGTEXT)
+    weeklyBreakdown = Column(LONGTEXT)
     status = Column(String(50))
     createdBy = Column(Integer, ForeignKey('users.userID'))
     createdAt = Column(DateTime)
