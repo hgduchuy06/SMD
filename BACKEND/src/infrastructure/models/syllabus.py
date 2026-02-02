@@ -2,7 +2,7 @@ from sqlalchemy import Column, ForeignKey, Integer, String, DateTime
 from infrastructure.databases.base import Base
 
 class SyllabusModel(Base):
-    __tablename__ = 'syllabuses'
+    __tablename__ = 'syllabus'
     __table_args__ = {'extend_existing': True}
     syllabusID = Column(Integer, primary_key=True)
     academicYear = Column(String(255))

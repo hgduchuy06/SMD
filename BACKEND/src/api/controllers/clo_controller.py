@@ -7,10 +7,10 @@ from infrastructure.models.syllabusversion import SyllabusVersionModel
 from infrastructure.models.plo import PLOModel
 from services.event_service import emit_syllabus_action
 
-bp = Blueprint('clo', __name__, url_prefix='/clos')
+clo_bp = Blueprint('clo', __name__, url_prefix='/clos')
 
 
-@bp.route('/', methods=['POST'])
+@clo_bp.route('/clo', methods=['POST'])
 def create_clo():
     data = request.get_json(silent=True) or {}
     versionID = data.get('versionID')
@@ -37,7 +37,7 @@ def create_clo():
         db.close()
 
 
-@bp.route('/<int:clo_id>', methods=['PUT'])
+@clo_bp.route('/<int:clo_id>', methods=['PUT'])
 def edit_clo(clo_id: int):
     data = request.get_json(silent=True) or {}
     db = SessionLocal()
@@ -54,7 +54,7 @@ def edit_clo(clo_id: int):
         db.close()
 
 
-@bp.route('/<int:clo_id>', methods=['DELETE'])
+@clo_bp.route('/<int:clo_id>', methods=['DELETE'])
 def delete_clo(clo_id: int):
     db = SessionLocal()
     try:
@@ -68,7 +68,7 @@ def delete_clo(clo_id: int):
         db.close()
 
 
-@bp.route('/<int:clo_id>/map_plo', methods=['POST'])
+@clo_bp.route('/<int:clo_id>/map_plo', methods=['POST'])
 def map_clo_plo(clo_id: int):
     data = request.get_json(silent=True) or {}
     ploID = data.get('ploID')
@@ -86,7 +86,7 @@ def map_clo_plo(clo_id: int):
         db.close()
 
 
-@bp.route('/version/<int:version_id>/mappings', methods=['GET'])
+@clo_bp.route('/version/<int:version_id>/mappings', methods=['GET'])
 def version_mappings(version_id: int):
     """Get CLO->PLO mappings for a syllabus version
 
@@ -121,7 +121,7 @@ def version_mappings(version_id: int):
         db.close()
 
 
-@bp.route('/syllabus/<int:syllabus_id>/mappings', methods=['GET'])
+@clo_bp.route('/syllabus/<int:syllabus_id>/mappings', methods=['GET'])
 def syllabus_mappings(syllabus_id: int):
     """Get CLO->PLO mappings across all versions for a syllabus
 

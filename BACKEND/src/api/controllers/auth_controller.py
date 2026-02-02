@@ -58,3 +58,18 @@ def refresh_token():
 
     except jwt.InvalidTokenError:
         return jsonify({'error': 'Invalid token'}), 401
+def get_current_user_id():
+    auth_header = request.headers.get("Authorization")
+    if not auth_header:
+        return None
+
+    try:
+        token = auth_header.replace("Bearer ", "")
+        decoded = jwt.decode(
+            token,
+            current_app.config["SECRET_KEY"],
+            algorithms=["HS256"]
+        )
+        return decoded.get("user_id")
+    except:
+        return None
