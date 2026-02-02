@@ -10,6 +10,7 @@ class SyllabusVersionModel(Base):
     versionNumber = Column(Integer)
     content = Column(LONGTEXT)
     changeSummary = Column(Text)
+    status = Column(String(50))
     createdBy = Column(Integer, ForeignKey('users.userID'))
     createdAt = Column(DateTime)
 

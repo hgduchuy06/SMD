@@ -8,3 +8,6 @@ class CLOModel(Base):
     versionID = Column(Integer, ForeignKey('syllabus_versions.versionID'))
     cloCode = Column(String(255))
     cloDescription = Column(Text)
+    knowledgeLevel = Column(String(50))
+    skillLevel = Column(String(50))
+    attitudeLevel = Column(String(50))

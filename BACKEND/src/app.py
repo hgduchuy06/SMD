@@ -4,6 +4,11 @@ from api.swagger import spec
 from api.controllers.user_controller import bp as todo_bp
 from api.controllers.auth_controller import auth_bp
 from api.controllers.ai_controller import ai_bp
+from api.controllers.workflow_controller import bp as workflow_bp
+from api.controllers.workitem_controller import bp as workitem_bp
+from api.controllers.syllabus_controller import bp as syllabus_bp
+from api.controllers.clo_controller import bp as clo_bp
+from api.controllers.assessment_controller import bp as assessment_bp
 from api.middleware import middleware
 from infrastructure.databases import init_db
 from api.responses import success_response
@@ -26,6 +31,11 @@ def create_app():
     # Đăng ký blueprint trước
     app.register_blueprint(auth_bp)
     app.register_blueprint(ai_bp)
+    app.register_blueprint(syllabus_bp)
+    app.register_blueprint(clo_bp)
+    app.register_blueprint(assessment_bp)
+    app.register_blueprint(workflow_bp)
+    app.register_blueprint(workitem_bp)
 
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
@@ -49,7 +59,7 @@ def create_app():
     with app.test_request_context():
         for rule in app.url_map.iter_rules():
             # Thêm các endpoint khác nếu cần
-            if rule.endpoint.startswith(('ai.','auth.')):
+            if rule.endpoint.startswith(('ai.','auth.','workflow.','workitem.')):
                 view_func = app.view_functions[rule.endpoint]
                 print(f"Adding path: {rule.rule} -> {view_func}")
                 spec.path(view=view_func)
