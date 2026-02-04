@@ -5,14 +5,17 @@ from api.swagger import spec
 from api.controllers.auth_controller import auth_bp
 from api.controllers.ai_controller import ai_bp
 from api.controllers.workflow_controller import bp as workflow_bp
-from api.controllers.workitem_controller import bp as workitem_bp
+from api.controllers.workitem_controller import workitem_bp
 from api.controllers.syllabus_controller import syllabus_bp
 from api.controllers.clo_controller import clo_bp
+from api.controllers.plo_controller import plo_bp
+from api.controllers.feedback_controller import feedback_bp
+from api.controllers.subscription_controller import subscription_bp
 from api.controllers.assessment_controller import bp as assessment_bp
-from api.controllers.integration_controller import bp as integration_bp
-#from api.controllers.audit_controller import bp as audit_bp
+from api.controllers.integration_controller import integration_bp
 from api.controllers.module_relationship_controller import bp as module_relationship_bp
 from api.middleware import middleware
+
 from infrastructure.databases import init_db
 from api.responses import success_response
 from config import Config
@@ -41,6 +44,9 @@ def create_app():
     app.register_blueprint(clo_bp)
     app.register_blueprint(module_relationship_bp)
     app.register_blueprint(integration_bp)
+    app.register_blueprint(plo_bp) 
+    app.register_blueprint(subscription_bp)
+    app.register_blueprint(feedback_bp)
     
      # Thêm Swagger UI blueprint
     SWAGGER_URL = '/docs'
@@ -64,7 +70,7 @@ def create_app():
     with app.test_request_context():
         for rule in app.url_map.iter_rules():
             # Thêm các endpoint khác nếu cần
-            if rule.endpoint.startswith(('ai.','auth.','workflow.','workitem.','clo.','integration.')):
+            if rule.endpoint.startswith(('ai.','auth.','workflow.','workitem.','clo.','integration.', 'audit.', 'plo.' )):
                 view_func = app.view_functions[rule.endpoint]
                 print(f"Adding path: {rule.rule} -> {view_func}")
                 spec.path(view=view_func)

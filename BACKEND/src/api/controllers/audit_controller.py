@@ -1,17 +1,19 @@
 from flask import Blueprint, request, jsonify
 from services.audit_service import record_audit, query_audits
 
-bp = Blueprint('audit', __name__, url_prefix='/audits')
+audit_bp = Blueprint('audit', __name__, url_prefix='/audits')
 
 
-@bp.route('/', methods=['GET'])
+@audit_bp.route('/', methods=['GET'])
 def list_audits():
     """
         Query audit logs
         ---
-        tags:
-            - Audit
-        parameters:
+        get: 
+          summary: Query audits
+          tags:
+              - Audit
+          parameters:
             - name: entityType
                 in: query
                 type: string
@@ -21,8 +23,8 @@ def list_audits():
             - name: limit
                 in: query
                 type: integer
-        responses:
-            200:
+          responses:
+              200:
                 description: List of audits
     """
     entity = request.args.get('entityType')
@@ -32,14 +34,16 @@ def list_audits():
     return jsonify(res), 200
 
 
-@bp.route('/', methods=['POST'])
+@audit_bp.route('/', methods=['POST'])
 def create_audit():
     """
         Create an audit log entry
         ---
-        tags:
+        post:
+          summary: Create audit log
+          tags:
             - Audit
-        parameters:
+          parameters:
             - name: body
                 in: body
                 required: true
@@ -56,8 +60,8 @@ def create_audit():
                             type: integer
                         details:
                             type: string
-        responses:
-            201:
+          responses:
+              201:
                 description: Created
         """
     data = request.get_json(silent=True) or {}

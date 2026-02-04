@@ -88,19 +88,21 @@ def map_clo_plo(clo_id: int):
 
 @clo_bp.route('/version/<int:version_id>/mappings', methods=['GET'])
 def version_mappings(version_id: int):
-    """Get CLO->PLO mappings for a syllabus version
+    """
+    Get CLO->PLO mappings for a syllabus version
 
     ---
-    tags:
-      - CLO
-    parameters:
-      - name: version_id
-        in: path
-        type: integer
-        required: true
-    responses:
-      200:
-        description: Mapping table
+    get:
+      tags:
+        - CLO
+      parameters:
+        - name: version_id
+          in: path
+          type: integer
+          required: true
+      responses:
+        200:
+          description: Mapping table
     """
     db = SessionLocal()
     try:
@@ -123,19 +125,21 @@ def version_mappings(version_id: int):
 
 @clo_bp.route('/syllabus/<int:syllabus_id>/mappings', methods=['GET'])
 def syllabus_mappings(syllabus_id: int):
-    """Get CLO->PLO mappings across all versions for a syllabus
+    """
+    Get CLO->PLO mappings across all versions for a syllabus
 
     ---
-    tags:
-      - CLO
-    parameters:
-      - name: syllabus_id
-        in: path
-        type: integer
-        required: true
-    responses:
-      200:
-        description: Mapping table
+    get:
+      tags:
+        - CLO
+      parameters:
+        - name: syllabus_id
+          in: path
+          type: integer
+          required: true
+      responses:
+        200:
+          description: Mapping table
     """
     db = SessionLocal()
     try:

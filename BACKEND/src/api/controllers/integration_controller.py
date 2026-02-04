@@ -1,10 +1,10 @@
 from flask import Blueprint, request, jsonify
 from services.workflow_service import start_workflow
 
-bp = Blueprint('integration', __name__, url_prefix='/integration')
+integration_bp = Blueprint('integration', __name__, url_prefix='/integration')
 
 
-@bp.route('/workflow/start', methods=['POST'])
+@integration_bp.route('/workflow/start', methods=['POST'])
 def start_from_external():
     """
     Start a workflow from an external system

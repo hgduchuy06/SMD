@@ -2,10 +2,10 @@ from flask import Blueprint, request, jsonify
 from services.workitem_service import create_workitem, reassign_workitem, set_workitem_status, list_workitems_for_user
 from datetime import datetime
 
-bp = Blueprint('workitem', __name__, url_prefix='/workitems')
+workitem_bp = Blueprint('workitem', __name__, url_prefix='/workitems')
 
 
-@bp.route('/', methods=['POST'])
+@workitem_bp.route('/', methods=['POST'])
 def create():
     """
     Create a work item (task) for a reviewer
@@ -45,7 +45,7 @@ def create():
     return jsonify(res), 201
 
 
-@bp.route('/<int:workitem_id>/reassign', methods=['PUT'])
+@workitem_bp.route('/<int:workitem_id>/reassign', methods=['PUT'])
 def reassign(workitem_id: int):
     """
     Reassign a work item to a different reviewer
@@ -77,7 +77,7 @@ def reassign(workitem_id: int):
     return jsonify(res), 200
 
 
-@bp.route('/<int:workitem_id>/status', methods=['PUT'])
+@workitem_bp.route('/<int:workitem_id>/status', methods=['PUT'])
 def status(workitem_id: int):
     """
     Update work item status
@@ -106,7 +106,7 @@ def status(workitem_id: int):
     return jsonify(res), 200
 
 
-@bp.route('/', methods=['GET'])
+@workitem_bp.route('/', methods=['GET'])
 def list_for_user():
     """
     List work items for a reviewer
